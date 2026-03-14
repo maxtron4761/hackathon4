@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TruthGuard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080d;--card:#0f1218;--card2:#151b24;
+  --border:rgba(255,255,255,0.07);
+  --cyan:#00d4ff;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;
+  --text:#dde4f5;--muted:#4a5568;--sub:#8892a4;
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:ui-monospace,'Cascadia Code','Fira Code',monospace;
+  min-height:100vh;padding:28px 16px;
+  max-width:680px;margin:0 auto;
+}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+.logo{font-size:1.6rem;font-weight:800;letter-spacing:.08em;margin-bottom:4px}
+.logo span{color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,.4)}
+.tagline{color:var(--muted);font-size:.72rem;margin-bottom:24px}
+
+details.keys{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;margin-bottom:22px;
+}
+details.keys summary{
+  cursor:pointer;font-size:.78rem;color:var(--sub);
+  list-style:none;display:flex;align-items:center;gap:8px;
+}
+details.keys summary::-webkit-details-marker{display:none}
+details.keys summary:hover{color:var(--text)}
+.key-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.key-row .klabel{font-size:.7rem;color:var(--muted);min-width:100px;cursor:default;flex-shrink:0}
+.key-links{font-size:.68rem;color:var(--muted);margin-top:12px;line-height:2}
+.key-badge{
+  font-size:.58rem;padding:1px 6px;border-radius:3px;margin-left:4px;
+  font-weight:700;letter-spacing:.05em;vertical-align:middle;
+}
+.req{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+.opt{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+
+input[type=password],input[type=text],textarea{
+  flex:1;background:#0a0d14;border:1px solid var(--border);
+  border-radius:6px;color:var(--text);
+  font-family:inherit;font-size:.84rem;
+  padding:9px 13px;width:100%;outline:none;
+  transition:border-color .2s;
+}
+input[type=password]:focus,input[type=text]:focus,textarea:focus{
+  border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,212,255,.1)
+}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{resize:vertical;min-height:110px;line-height:1.65}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:22px}
+.tab{
+  background:none;border:none;color:var(--muted);
+  font-family:inherit;font-size:.8rem;
+  padding:10px 18px;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .2s;
+}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab:hover:not(.active){color:var(--sub)}
+
+.upload-label{
+  display:block;border:2px dashed rgba(255,255,255,0.12);
+  border-radius:10px;padding:40px 16px;text-align:center;
+  cursor:pointer;transition:all .2s;margin-bottom:14px;
+  color:var(--muted);font-size:.82rem;user-select:none;
+}
+.upload-label:hover,.upload-label.over{
+  border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.03);
+}
+.upload-label img{max-height:220px;border-radius:8px;display:block;margin:0 auto 10px;max-width:100%}
+#fi{position:absolute;left:-9999px;opacity:0;width:1px;height:1px}
+
+.btn{
+  background:var(--cyan);color:#06080e;border:none;
+  border-radius:8px;padding:13px 24px;
+  font-family:inherit;font-size:.82rem;font-weight:700;
+  cursor:pointer;width:100%;text-transform:uppercase;
+  letter-spacing:.07em;transition:all .2s;margin-top:4px;
+}
+.btn:hover:not(:disabled){background:#2ddeff;box-shadow:0 0 20px rgba(0,212,255,.25)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-sm{
+  background:rgba(255,255,255,0.05);color:var(--sub);
+  border:1px solid var(--border);border-radius:6px;
+  padding:6px 14px;font-family:inherit;font-size:.72rem;
+  cursor:pointer;transition:all .15s;margin-top:8px;
+  width:auto;display:inline-block;
+}
+.btn-sm:hover{background:rgba(255,255,255,0.08);color:var(--text)}
+
+.search-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;margin:4px;
+  font-size:.7rem;background:rgba(0,212,255,.08);
+  border:1px solid rgba(0,212,255,.2);color:var(--cyan);
+}
+.search-pill.done{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);color:#22c55e}
+
+.loading{text-align:center;padding:36px 16px;color:var(--sub);font-size:.8rem}
+.spin{
+  width:30px;height:30px;border:2px solid rgba(0,212,255,.15);
+  border-top-color:var(--cyan);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.results{margin-top:24px;animation:fadeup .35s ease both}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.score-num{font-size:3.8rem;font-weight:800;line-height:1}
+.score-label{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:100px;
+  font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.summary-text{font-size:.88rem;color:var(--sub);line-height:1.7;font-style:italic}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.card-title{font-size:.63rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.item{background:var(--card2);border-radius:7px;padding:11px 13px;margin-bottom:8px;font-size:.8rem}
+.item:last-child{margin-bottom:0}
+.item-verdict{font-size:.62rem;font-weight:700;text-transform:uppercase;margin-bottom:4px;letter-spacing:.06em}
+.item-title{font-weight:600;margin-bottom:4px;font-size:.83rem}
+.item-body{color:var(--sub);font-size:.77rem;line-height:1.55}
+.bar-wrap{margin-bottom:14px}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.75rem}
+.bar{height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 1.1s cubic-bezier(.16,1,.3,1)}
+.flags{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;margin-bottom:12px}
+.flag-item{font-size:.78rem;color:#fca5a5;padding:4px 0 4px 10px;border-left:2px solid var(--red);margin-bottom:5px;line-height:1.45}
+.flag-item:last-child{margin-bottom:0}
+.context-box{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:10px;padding:14px;margin-bottom:12px}
+.note{font-size:.66rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6}
+.error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:14px 16px;color:#f87171;font-size:.8rem;margin-top:16px;line-height:1.6}
+
+.sources-live{
+  background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);
+  border-radius:10px;padding:14px;margin-bottom:12px;
+}
+.source-live-item{
+  padding:8px 0;border-bottom:1px solid var(--border);
+  font-size:.78rem;
+}
+.source-live-item:last-child{border-bottom:none}
+.source-live-title{font-weight:600;color:var(--text);margin-bottom:2px}
+.source-live-desc{color:var(--sub);font-size:.72rem;line-height:1.5;margin-bottom:3px}
+</style>
+</head>
+<body>
+
+<div class="logo">TRUTH<span>GUARD</span></div>
+<p class="tagline">Live web search · AI fact-checker & deepfake detector · Free APIs</p>
+
+<details class="keys" id="kd">
+  <summary>⚙ API Keys <span style="color:var(--muted);font-size:.68rem;margin-left:6px">(saved automatically in your browser)</span></summary>
+
+  <div class="key-row">
+    <span class="klabel">Groq <span class="key-badge req">REQUIRED</span></span>
+    <input type="password" id="gKey" placeholder="gsk_..." oninput="saveKeys()">
+  </div>
+  <div class="key-row">
+    <span class="klabel">Tavily <span class="key-badge opt">RECOMMENDED</span></span>
+    <input type="password" id="bKey" placeholder="tvly-..." oninput="saveKeys()">
+  </div>
+
+  <div class="key-links">
+    All free — no credit card needed:<br>
+    · <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> → Create API Key &nbsp;<span style="color:var(--muted)">(fact-checking AI)</span><br>
+    · <a href="https://app.tavily.com" target="_blank">app.tavily.com</a> → Sign up free → copy your API key &nbsp;<span style="color:var(--muted)">(live web search built for AI — fixes outdated answers, 1,000/month free)</span><br>
+  </div>
+</details>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('news',this)">Fact Check</button>
+  <button class="tab" onclick="showTab('img',this)">Deepfake Detect</button>
+</div>
+
+<!-- Fact Check Tab -->
+<div id="newsTab">
+  <textarea id="claim" placeholder="Ask anything or paste a claim to fact-check...&#10;&#10;Examples:&#10;· Who is the current president of the United States?&#10;· The Great Wall of China is visible from space.&#10;· Paste a news headline here..." maxlength="3000"></textarea>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 12px">
+    <span style="font-size:.68rem;color:var(--muted)" id="wsStatus"></span>
+    <span style="font-size:.68rem;color:var(--muted)" id="cc">0 / 3000</span>
+  </div>
+  <button class="btn" onclick="factCheck()">Search & Fact Check</button>
+</div>
+
+<!-- Deepfake Tab -->
+<div id="imgTab" style="display:none">
+  <label for="fi" class="upload-label" id="dz"
+    ondragover="event.preventDefault();this.classList.add('over')"
+    ondragleave="this.classList.remove('over')"
+    ondrop="onDrop(event)">
+    <div id="dzc">
+      <div style="font-size:2.5rem;margin-bottom:10px">🖼️</div>
+      <div style="font-weight:600;margin-bottom:6px">Click here to choose an image</div>
+      <div style="font-size:.72rem">or drag and drop onto this box</div>
+      <div style="font-size:.68rem;margin-top:6px;opacity:.6">JPEG · PNG · WebP · GIF · Max 10MB</div>
+    </div>
+  </label>
+  <input type="file" id="fi" accept="image/*" onchange="onFile(this.files[0])">
+  <div id="imgInfo" style="display:none;margin-bottom:10px">
+    <button class="btn-sm" onclick="clearImage()">✕ Remove & choose another</button>
+  </div>
+  <button class="btn" onclick="checkDeepfake()">Analyze for Deepfake</button>
+</div>
+
+<div id="out"></div>
+
+<script>
+let imgFile = null
+const TODAY = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+
+function saveKeys(){
+  localStorage.setItem('tg_g', document.getElementById('gKey').value)
+  localStorage.setItem('tg_b', document.getElementById('bKey').value)
+  updateSearchStatus()
+}
+function loadKeys(){
+  const g = localStorage.getItem('tg_g')||''
+  const b = localStorage.getItem('tg_b')||''
+  document.getElementById('gKey').value = g
+  document.getElementById('bKey').value = b
+  if(g) document.getElementById('kd').removeAttribute('open')
+  else  document.getElementById('kd').setAttribute('open','')
+  updateSearchStatus()
+}
+function updateSearchStatus(){
+  const b = document.getElementById('bKey').value.trim()
+  const el = document.getElementById('wsStatus')
+  if(el) el.innerHTML = b
+    ? '<span style="color:#22c55e">✓ Live web search enabled</span>'
+    : '<span style="color:var(--amber)">⚠ No Tavily key — using AI knowledge only (may be outdated)</span>'
+}
+
+function showTab(t,el){
+  document.getElementById('newsTab').style.display = t==='news'?'block':'none'
+  document.getElementById('imgTab').style.display  = t==='img' ?'block':'none'
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('out').innerHTML=''
+}
+
+function onFile(f){
+  if(!f) return
+  if(f.size > 10*1024*1024){ err('Image exceeds 10MB. Please use a smaller file.'); return }
+  imgFile = f
+  const r = new FileReader()
+  r.onload = e => {
+    document.getElementById('dzc').innerHTML =
+      `<img src="${e.target.result}" alt="preview">
+       <div style="color:var(--cyan);font-size:.75rem;margin-top:8px;font-weight:600">${f.name}</div>
+       <div style="color:var(--muted);font-size:.68rem">${(f.size/1024).toFixed(0)} KB · ${f.type}</div>`
+    document.getElementById('imgInfo').style.display='block'
+  }
+  r.readAsDataURL(f)
+}
+function onDrop(e){
+  e.preventDefault(); e.stopPropagation()
+  document.getElementById('dz').classList.remove('over')
+  const f = e.dataTransfer.files[0]
+  if(f && f.type.startsWith('image/')) onFile(f)
+  else err('Please drop an image file (JPEG, PNG, WebP, or GIF).')
+}
+function clearImage(){
+  imgFile=null
+  document.getElementById('fi').value=''
+  document.getElementById('imgInfo').style.display='none'
+  document.getElementById('dzc').innerHTML=
+    `<div style="font-size:2.5rem;margin-bottom:10px">🖼️</div>
+     <div style="font-weight:600;margin-bottom:6px">Click here to choose an image</div>
+     <div style="font-size:.72rem">or drag and drop onto this box</div>
+     <div style="font-size:.68rem;margin-top:6px;opacity:.6">JPEG · PNG · WebP · GIF · Max 10MB</div>`
+  document.getElementById('out').innerHTML=''
+}
+
+document.getElementById('claim').addEventListener('input',function(){
+  document.getElementById('cc').textContent=`${this.value.length} / 3000`
+})
+
+const VC={TRUE:'#22c55e',MOSTLY_TRUE:'#22c55e',HALF_TRUE:'#f59e0b',MISLEADING:'#f97316',MOSTLY_FALSE:'#ef4444',FALSE:'#ef4444',UNVERIFIABLE:'#f59e0b',SATIRE:'#a78bfa'}
+const SC=s=>s>=70?'#22c55e':s>=45?'#f59e0b':'#ef4444'
+const VC2=v=>VC[v]||'#94a3b8'
+const show=h=>{document.getElementById('out').innerHTML=h}
+const loading=msg=>show(`<div class="loading"><div class="spin"></div>${msg}</div>`)
+const err=msg=>show(`<div class="error">⚠ ${msg}</div>`)
+
+async function braveSearch(query){
+  const key = document.getElementById('bKey').value.trim()
+  if(!key) return { results: null, error: 'no_key' }
+  try{
+    const res = await fetch('https://api.tavily.com/search',{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        api_key: key, query: query, search_depth: 'basic',
+        max_results: 6, include_answer: true
+      })
+    })
+    if(res.status === 401) return { results: null, error: 'invalid_key' }
+    if(!res.ok) return { results: null, error: `HTTP ${res.status}` }
+    const data = await res.json()
+    const results = data.results || []
+    const answerBlock = data.answer ? `DIRECT ANSWER FROM SEARCH: ${data.answer}\n\n` : ''
+    const formatted = results.map((r,i)=>
+      `[${i+1}] ${r.title}\nURL: ${r.url}\n${r.content||r.snippet||''}`
+    ).join('\n\n')
+    return { results: answerBlock + formatted, error: null }
+  } catch(e){ return { results: null, error: e.message } }
+}
+
+async function factCheck(){
+  const text = document.getElementById('claim').value.trim()
+  const gKey = document.getElementById('gKey').value.trim()
+  const bKey = document.getElementById('bKey').value.trim()
+  if(!text) return err('Please enter a claim or question to fact-check.')
+  if(!gKey) return err('Groq API key required. Click ⚙ API Keys above. Get one free at console.groq.com/keys')
+  if(bKey){ loading('🔍 Searching the web for current information...') }
+  else { loading('Analyzing with Groq AI...<br><small style="color:var(--amber)">No Tavily key — results may be outdated</small>') }
+  const { results: searchResults, error: searchError } = await braveSearch(text)
+  if(searchResults){ loading('Search complete. Analyzing with AI...') }
+  else if(searchError === 'no_key'){ loading('Analyzing with AI only — no Tavily key provided...<br><small style="color:var(--amber)">Results may be outdated. Get a free key at app.tavily.com</small>') }
+  else if(searchError === 'invalid_key'){ return err('Tavily key is invalid. Check your key at app.tavily.com/account') }
+  else { loading('Web search failed — analyzing with AI only...<br><small style="color:var(--amber)">Error: ' + searchError + '</small>') }
+
+  const searchBlock = searchResults
+    ? `LIVE WEB SEARCH RESULTS (fetched right now — use these as ground truth, they are more accurate than your training):\n${searchResults}\n\nCRITICAL: Today is ${TODAY}. Base your answer primarily on the search results above, not your training data.`
+    : `NOTE: No live search available. Today is ${TODAY}. Your training data cuts off in early 2024 — mark any time-sensitive facts as UNVERIFIABLE.`
+
+  const prompt = `You are an expert fact-checker with access to current information.\n\n${searchBlock}\n\nCLAIM TO FACT-CHECK: "${text.slice(0,2000)}"\n\nRespond with ONLY a raw JSON object — no markdown, no backticks, nothing else:\n{"verdict":"TRUE|MOSTLY_TRUE|HALF_TRUE|MISLEADING|MOSTLY_FALSE|FALSE|UNVERIFIABLE|SATIRE","trustScore":<0-100>,"summary":"<2-3 sentence verdict using search results if available>","claims":[{"claim":"<specific checkable sub-claim>","verdict":"<TRUE|FALSE|MISLEADING|UNVERIFIABLE>","explanation":"<cite search results where possible>"}],"sources":[{"title":"<source name>","url":"<url from search results if available, else best known url>","supports":"CLAIM|DEBUNKS|CONTEXTUALIZES","note":"<one sentence>"}],"redFlags":["<warning sign if any>"],"context":"<important background context>"}`
+
+  try{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${gKey}`,'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'llama-3.3-70b-versatile', messages:[{role:'user',content:prompt}], temperature:0.1, max_tokens:2048 })
+    })
+    if(!res.ok){
+      const e = await res.json().catch(()=>({}))
+      if(res.status===401) return err('Invalid Groq key. Check console.groq.com/keys')
+      if(res.status===429) return err('Groq rate limit hit. Wait 30 seconds and try again.')
+      throw new Error(e.error?.message||`HTTP ${res.status}`)
+    }
+    const data = await res.json()
+    const raw = data.choices[0].message.content.trim()
+    let parsed
+    try{ parsed = JSON.parse(raw) } catch{ const m = raw.match(/\{[\s\S]*\}/); if(m) parsed = JSON.parse(m[0]); else throw new Error('Unexpected response format. Please try again.') }
+    renderNews(parsed, !!searchResults, text, searchError)
+  } catch(e){ err(`Error: ${e.message}`) }
+}
+
+async function checkDeepfake(){
+  const gKey = document.getElementById('gKey').value.trim()
+  if(!imgFile) return err('No image selected. Click the upload box above first.')
+  if(!gKey) return err('Groq API key required. Click ⚙ API Keys above. Get one free at console.groq.com/keys')
+  loading('Reading image...')
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = e => resolve(e.target.result.split(',')[1])
+    reader.onerror = () => reject(new Error('Could not read image file'))
+    reader.readAsDataURL(imgFile)
+  })
+  const mimeType = imgFile.type || 'image/jpeg'
+  loading('Analyzing image with Groq Vision AI...<br><small style="color:var(--muted)">Checking for AI generation artifacts, inconsistencies, and manipulation signs</small>')
+
+  const prompt = `You are a forensic image analyst specializing in detecting AI-generated images and deepfakes.\n\nAnalyze this image carefully for signs of:\n- AI generation (Stable Diffusion, Midjourney, DALL-E, etc.)\n- Face swapping or deepfake manipulation\n- Unnatural skin texture or overly smooth features\n- Inconsistent lighting or shadows\n- Blurry or warped edges around faces or hair\n- Artifacts in eyes, teeth, ears, or fingers\n- Background inconsistencies\n- Unnatural proportions\n\nRespond with ONLY a raw JSON object, no markdown, no extra text:\n{"verdict":"LIKELY_AI_GENERATED"|"LIKELY_MANIPULATED"|"UNCERTAIN"|"LIKELY_AUTHENTIC","aiScore":<0-100 probability this is AI or fake>,"authenticityScore":<0-100 probability this is real>,"confidence":<0-100 how confident you are>,"summary":"<2-3 sentence plain English explanation of what you found>","indicators":[{"name":"<what you checked>","finding":"<what you saw>","suspicious":true|false}]}`
+
+  try{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${gKey}`,'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages:[{ role:'user', content:[ { type:'image_url', image_url:{ url:`data:${mimeType};base64,${base64}` } }, { type:'text', text: prompt } ] }],
+        temperature: 0.1, max_tokens: 1024
+      })
+    })
+    if(res.status===401) return err('Invalid Groq API key. Check console.groq.com/keys')
+    if(res.status===429) return err('Groq rate limit hit. Wait 30 seconds and try again.')
+    if(res.status===413) return err('Image is too large for the API. Try a smaller image (under 4MB).')
+    if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || `Groq error HTTP ${res.status}`) }
+    const data = await res.json()
+    const raw = data.choices[0].message.content.trim()
+    let parsed
+    try{ parsed = JSON.parse(raw) } catch{ const m = raw.match(/\{[\s\S]*\}/); if(m) parsed = JSON.parse(m[0]); else throw new Error('Unexpected response from vision model. Try again.') }
+    renderDeepfake(parsed)
+  } catch(e){ err(`Error: ${e.message}`) }
+}
+
+function renderNews(r, hadSearch, originalQuery, searchErr){
+  const vc=VC2(r.verdict), sc=SC(r.trustScore??50), vl=(r.verdict||'UNKNOWN').replace(/_/g,' ')
+  let h=`<div class="results"><div class="card" style="border-color:${vc}30;margin-bottom:16px"><div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap"><div style="text-align:center;min-width:70px"><div class="score-num" style="color:${sc}">${r.trustScore??'?'}</div><div class="score-label">Trust Score</div></div><div style="flex:1;min-width:180px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="badge" style="background:${vc}18;color:${vc};border:1px solid ${vc}35">${vl}</span><span style="font-size:.65rem;color:${hadSearch?'#22c55e':'var(--amber)'}">${hadSearch?'✓ Used live web search':'⚠ No live search (may be outdated)'}</span></div><p class="summary-text">${r.summary||''}</p></div></div></div>`
+  if(r.claims?.length){ h+=`<div class="card"><div class="card-title">Claims Checked (${r.claims.length})</div>`; r.claims.forEach(c=>{ const cc=VC2(c.verdict); h+=`<div class="item"><div class="item-verdict" style="color:${cc}">${(c.verdict||'?').replace(/_/g,' ')}</div><div class="item-title">${c.claim}</div><div class="item-body">${c.explanation}</div></div>` }); h+=`</div>` }
+  if(r.sources?.length){ h+=`<div class="card"><div class="card-title">Sources (${r.sources.length})</div>`; r.sources.forEach(s=>{ const sc2=s.supports==='DEBUNKS'?'#ef4444':s.supports==='CLAIM'?'#22c55e':'#f59e0b'; h+=`<div class="item" style="border-left:3px solid ${sc2}40"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:.82rem">${s.title||'Source'}</span><span style="font-size:.62rem;font-weight:700;color:${sc2}">${s.supports||''}</span></div>${s.note?`<div class="item-body" style="margin-bottom:5px">${s.note}</div>`:''}${s.url?`<a href="${s.url}" target="_blank" rel="noopener" style="font-size:.7rem">↗ ${s.url}</a>`:''}</div>` }); h+=`</div>` }
+  if(r.redFlags?.length){ h+=`<div class="flags"><div class="card-title" style="color:#f87171">⚠ Red Flags</div>`; r.redFlags.forEach(f=>{ h+=`<div class="flag-item">${f}</div>` }); h+=`</div>` }
+  if(r.context){ h+=`<div class="context-box"><div class="card-title" style="color:var(--cyan)">Context</div><p style="font-size:.82rem;color:var(--sub);line-height:1.65">${r.context}</p></div>` }
+  h+=`<p class="note">${hadSearch?'Results grounded in live web search via Tavily.':'No live search used — add a free Tavily key at app.tavily.com for current results.'}<br>Always verify critical information independently.</p></div>`
+  show(h)
+}
+
+function renderDeepfake(r){
+  const ai=r.aiScore??50, real=r.authenticityScore??(100-ai), conf=r.confidence??50
+  const verdictLabels={LIKELY_AI_GENERATED:'Likely AI Generated / Deepfake',LIKELY_MANIPULATED:'Likely Manipulated',UNCERTAIN:'Uncertain — Inconclusive',LIKELY_AUTHENTIC:'Likely Authentic'}
+  const verdictLabel=verdictLabels[r.verdict]||r.verdict||'Unknown'
+  const vc=ai>=70?'var(--red)':ai>=40?'var(--amber)':'var(--green)', rc=real>=60?'var(--green)':real>=40?'var(--amber)':'var(--red)', cc=conf>=70?'var(--cyan)':'var(--sub)'
+  let h=`<div class="results"><div class="card" style="border-color:${vc}40;margin-bottom:12px"><span class="badge" style="background:${vc}18;color:${vc};border:1px solid ${vc}40;margin-bottom:18px;display:inline-block">${verdictLabel}</span><div class="bar-wrap"><div class="bar-label"><span style="color:var(--sub)">AI / Deepfake Probability</span><span style="font-weight:700;color:${vc}">${ai}%</span></div><div class="bar"><div class="bar-fill" style="width:${ai}%;background:${vc}"></div></div></div><div class="bar-wrap"><div class="bar-label"><span style="color:var(--sub)">Authenticity Score</span><span style="font-weight:700;color:${rc}">${real}%</span></div><div class="bar"><div class="bar-fill" style="width:${real}%;background:${rc}"></div></div></div><div class="bar-wrap" style="margin-bottom:0"><div class="bar-label"><span style="color:var(--sub)">Analysis Confidence</span><span style="font-weight:700;color:${cc}">${conf}%</span></div><div class="bar"><div class="bar-fill" style="width:${conf}%;background:${cc}"></div></div></div></div>`
+  if(r.summary) h+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Summary</div><p style="font-size:.85rem;color:var(--sub);line-height:1.7;font-style:italic">${r.summary}</p></div>`
+  if(r.indicators?.length){ h+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Forensic Indicators</div>`; r.indicators.forEach(ind=>{ h+=`<div class="item" style="border-left:3px solid ${ind.suspicious?'var(--red)':'var(--green)'}40"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-weight:600;font-size:.8rem">${ind.name}</span><span style="font-size:.65rem;font-weight:700;color:${ind.suspicious?'var(--red)':'var(--green)'}">${ind.suspicious?'SUSPICIOUS':'CLEAN'}</span></div><div class="item-body">${ind.finding}</div></div>` }); h+=`</div>` }
+  h+=`<p class="note">Analyzed by Groq Llama 4 Vision · Results are probabilistic, not legally admissible.</p></div>`
+  show(h)
+}
+
+loadKeys()
+</script>
+</body>
+</html>
