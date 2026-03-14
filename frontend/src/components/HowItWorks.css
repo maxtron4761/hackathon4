@@ -1,0 +1,101 @@
+.how-it-works {
+  background: var(--bg-primary);
+  position: relative;
+}
+
+.how-it-works::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+}
+
+.steps-container {
+  display: flex;
+  gap: var(--space-xl);
+  position: relative;
+  justify-content: center;
+}
+
+.steps-container::before {
+  content: '';
+  position: absolute;
+  top: 52px;
+  left: calc(16.67% + 40px);
+  right: calc(16.67% + 40px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-green));
+  opacity: 0.3;
+}
+
+.step-card {
+  flex: 1;
+  max-width: 340px;
+  text-align: center;
+  padding: var(--space-2xl);
+  position: relative;
+  z-index: 1;
+}
+
+.step-number {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  font-weight: 900;
+  margin: 0 auto var(--space-xl);
+  position: relative;
+}
+
+.step-card:nth-child(1) .step-number {
+  background: var(--accent-cyan-glow);
+  color: var(--accent-cyan);
+  border: 2px solid rgba(0, 229, 255, 0.3);
+}
+
+.step-card:nth-child(2) .step-number {
+  background: var(--accent-purple-glow);
+  color: var(--accent-purple);
+  border: 2px solid rgba(179, 136, 255, 0.3);
+}
+
+.step-card:nth-child(3) .step-number {
+  background: var(--accent-green-glow);
+  color: var(--accent-green);
+  border: 2px solid rgba(0, 230, 118, 0.3);
+}
+
+.step-icon {
+  font-size: 40px;
+  margin-bottom: var(--space-lg);
+  display: block;
+}
+
+.step-card h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.step-card p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .steps-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .steps-container::before {
+    display: none;
+  }
+}

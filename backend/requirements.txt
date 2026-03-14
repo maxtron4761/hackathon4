@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+transformers
+torch
+torchvision
+Pillow
+python-multipart
+beautifulsoup4
+requests
+aiohttp
